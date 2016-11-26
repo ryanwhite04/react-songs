@@ -5,6 +5,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import './App.css';
 import Player from './Player';
 import Editor from './Editor';
+import String from './String';
 
 // Needed for onTouchTap
 // http://stackoverflow.com/a/34015469/988941
@@ -17,9 +18,10 @@ class App extends Component {
     this.state = {
       open: false,
       playing: false,
+      text: '1-2-3-4-5\n-4-5-6-7-8',
     };
   }
-
+  updateText = text => this.setState({ text })
   toggleDrawer = () => this.setState({ open: !this.state.open });
   togglePlayer = () => this.refs.player.toggle();
 
@@ -38,8 +40,14 @@ class App extends Component {
         <RaisedButton onClick={this.togglePlayer} >
           {this.state.playing ? 'Stop' : 'Play'}
         </RaisedButton>
-        <Editor ref='editor' options={{ lineNumbers: true }} />
-        <Player ref='player' playing={this.state.playing} />
+        <Editor ref='editor' options={{ lineNumbers: true }} update={this.updateText}>
+          {this.state.text}
+        </Editor>
+        <Player ref='player' playing={this.state.playing} >
+          {this.state.text.split('\n').map((line, i) =>
+            <String key={i} line={line} />
+          )}
+        </Player>
       </div>
     </MuiThemeProvider>
 }
