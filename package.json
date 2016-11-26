@@ -10,7 +10,8 @@
     "react": "^15.4.1",
     "react-codemirror": "^0.3.0",
     "react-dom": "^15.4.1",
-    "react-music": "^1.0.2"
+    "react-music": "^1.0.2",
+    "react-tap-event-plugin": "^2.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
