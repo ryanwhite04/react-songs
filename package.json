@@ -6,9 +6,11 @@
     "react-scripts": "0.7.0"
   },
   "dependencies": {
+    "material-ui": "^0.16.4",
     "react": "^15.4.1",
     "react-codemirror": "^0.3.0",
-    "react-dom": "^15.4.1"
+    "react-dom": "^15.4.1",
+    "react-music": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
