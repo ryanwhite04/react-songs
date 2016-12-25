@@ -2,7 +2,9 @@
   "name": "react-songs",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://ryanwhite04.github.io/react-songs",
   "devDependencies": {
+    "gh-pages": "^0.12.0",
     "react-scripts": "0.7.0"
   },
   "dependencies": {
