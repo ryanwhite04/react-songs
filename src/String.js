@@ -1,43 +1,32 @@
 import React from 'react';
-import { Sequencer, Synth } from 'react-music';
+import Synth from './Synth';
 
-const Stream = ({
-  open = 60,
-  type = 'sine',
-  line = '1-4-3-5--7',
-  resolution = 32,
-  bars = 2,
-  length = 2,
-}) => <Sequencer resolution={resolution} bars={bars} >
-  <Synth type="sine" steps={toSteps(line, length, toNote(open))} />
-</Sequencer>
-
-
-function toNote(open) {
-  return number => [
-    'c',
-    'c#',
-    'd',
-    'd#',
+let toNote = open => number => [
+    'c', 'c#',
+    'd', 'd#',
     'e',
-    'f',
-    'f#',
-    'g',
-    'g#',
-    'a',
-    'a#',
+    'f', 'f#',
+    'g', 'g#',
+    'a', 'a#',
     'b',
   ][(open + number) % 12] + Math.floor((open + number) / 12);
+
+let toSteps = (line, length, toNote) =>
+  line.trim().split('').map((beat, i) => /[0-9A-Z]/.test(beat) ? [
+    i, length, toNote(parseInt(beat, 36))
+  ] : false).filter(Array);
+
+const String = ({
+  text,
+  char,
+  type = 'sine',
+  open = 60,
+  bars = 2,
+  length = 2,
+  resolution = 32,
+  callback = args => console.log(args),
+}) => {
+  return <Synth {...{type}} />
 }
 
-function toSteps(line, length, toNote) {
-  var steps = line.split('').map((beat, i) => beat === '-' ? false : [
-    i, length, toNote(Number(beat))
-  ]).filter(Array);
-  console.log('toSteps', {
-    line, length, toNote, steps,
-  })
-  return steps;
-}
-
-export default Stream;
+export default String;
