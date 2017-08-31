@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
 import text from './example.js';
 import { MuiThemeProvider } from 'material-ui/styles';
-import {
-  Drawer,
-  AppBar,
-  IconButton,
-} from 'material-ui';
 import AvPlayArrow from 'material-ui/svg-icons/av/play-arrow';
 import AvPause from 'material-ui/svg-icons/av/pause';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import Player from './Player';
 import Editor from './Editor';
+import soundfonts from 'soundfonts';
+import guitar from 'soundfonts/instruments/Acoustic Guitar (nylon)/mp3.json';
+// import ogg from 'soundfonts/instruments/Acoustic Guitar (nylon)/ogg.json';
 
-// Needed for onTouchTap
-// http://stackoverflow.com/a/34015469/988941
+import {
+  Drawer,
+  AppBar,
+  IconButton,
+} from 'material-ui';
+
 injectTapEventPlugin();
 
 const GithubLink = ({
@@ -67,10 +69,6 @@ class App extends Component {
           anchor.line += 10;
         }
       }
-      // console.log({
-      //   next,
-      //   ch, line,
-      // })
       return {
         anchor, head: {
           line: anchor.line,
@@ -81,17 +79,11 @@ class App extends Component {
     this.setState({ ranges })
   };
 
-  cursorActivity = instance => {
-    var ranges = instance.listSelections();
+  cursorActivity = instance => this.setState({
+    ranges: instance.listSelections()
+  });
 
-    // console.log('app', 'cursorActivity', { ranges: ranges[0] });
-    this.setState({ ranges });
-  }
-
-  update = text => {
-    // console.log(text);
-    this.setState({ text });
-  }
+  update = text => this.setState({ text });
 
   moveCursors = (x, y) => this.setState({
     ranges: this.state.ranges.map(({
@@ -102,6 +94,20 @@ class App extends Component {
       head: { ch: c + x, line: d + y},
     }))
   })
+
+  setInstrument = name => {
+
+    function handleJSON(json) {
+      const getAudio = string => new Audio(string);
+      const play = instrument => note => instrument[note].play();
+      return play(json.map(getAudio));
+    }
+
+    fetch(process.env.PUBLIC_URL + '/instruments/' + name + '/mp3.json')
+      .then(response => response.json())
+      .then(handleJSON)
+      .then(instrument => this.setState({ instrument }));
+  }
 
   render = () =>
     <MuiThemeProvider>
@@ -153,7 +159,19 @@ class App extends Component {
           context={this.state.context}
           ranges={this.state.ranges}
           text={this.state.text}
-        />
+        >
+          {/* {guitar.map((src, i) => <audio
+            key={i}
+            crossOrigin="anonymous"
+            src={src} >
+          </audio>)} */}
+
+          {guitar.map((src, i) => {
+            var audio = new Audio(src);
+            audio.crossOrigin = 'anonymous';
+            return audio;
+          })}
+        </Player>
       </div>
     </MuiThemeProvider>
 }

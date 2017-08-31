@@ -12,35 +12,58 @@ const mappings = {
   'E': '|E4 ',
 };
 
-const Player = ({
+export default ({
+  children,
   context,
   playing,
   text,
   ranges,
 }) => {
-  var guitar = new Instrument(context, {
-    capo: 6,
-    gain: 0.5,
-    type: 'sine',
-    duration: 0.5,
-  }, {
-    attack: 0.01,
-    decay: 0.2,
-    sustain: 0.2,
-    release: 0.2
-  });
+
+  // var guitar = new Instrument(context, {
+  //   capo: 6,
+  //   gain: 0.5,
+  //   type: 'sine',
+  //   duration: 1,
+  // }, {
+  //   attack: 0.01,
+  //   decay: 0.2,
+  //   sustain: 0.2,
+  //   release: 0.2
+  // });
+  //
+  // console.log({ ranges })
+  //
+  // ranges
+  //   .map(({ anchor: { line, ch }}) => text.split('\n')[line].slice(0, ch))
+  //   .filter(text => text)
+  //   .map(text => ({
+  //     note: parseInt(text.slice(-1), 36),
+  //     string: guitar.string(getNote(mappings[text.split('|')[0]]))
+  //   }))
+  //   .forEach(({ note, string }, i) => {
+  //     if(!isNaN(note)) {
+  //       console.log({
+  //         note,
+  //       })
+  //       string.pluck(note, 0.5)
+  //     }
+  //   });
+  // return null;
 
   ranges
     .map(({ anchor: { line, ch }}) => text.split('\n')[line].slice(0, ch))
     .filter(text => text)
     .map(text => ({
       note: parseInt(text.slice(-1), 36),
-      string: guitar.string(getNote(mappings[text.split('|')[0]]))
+      string: getNote(mappings[text.split('|')[0]])
     }))
-    .forEach(({ note, string }) => {
-      console.log(note);
-      isNaN(note) || string.pluck(note, 0.5)
-    });
+    .filter(({ note, string }) => !isNaN(note))
+    .map(({ note, string }) => note + string - 20)
+    .map(note => context
+      .createMediaElementSource(children[note])
+      .connect(context.destination)
+    );
   return null;
 };
 
@@ -48,7 +71,7 @@ function getNote(string = '') {
   var trimmed = string.trim();
   var octave = Number(trimmed.slice(-1));
   var note = trimmed.slice(1, -1);
-  return 440 * 2 ** (([
+  return ([
     'C', 'C#',
     'D', 'D#',
     'E',
@@ -56,9 +79,8 @@ function getNote(string = '') {
     'G', 'G#',
     'A', 'A#',
     'B'
-  ].indexOf(note) + 12 * octave - 58) / 12);
+  ].indexOf(note) + 12 * octave);
 }
-
 
 function Instrument(context, {
   capo = 0,
@@ -92,10 +114,17 @@ function Instrument(context, {
         pluck: (fret = 0, duration = 1) => {
           var frequency = open * Math.pow(2, fret / 12);
           var now = context.currentTime;
-          amp.gain.setValueAtTime(gain, now);
-          osc.frequency.setValueAtTime(frequency, now);
-          env.start(now + 0.05);
-          osc.start(now);
+          console.log({
+            frequency,
+            now,
+            fret,
+            duration,
+            osc, env, amp
+          })
+          amp.gain.setValueAtTime(gain, context.currentTime);
+          osc.frequency.setValueAtTime(frequency, context.currentTime);
+          env.start(context.currentTime);
+          osc.start(context.currentTime);
           osc.stop(now + duration);
           env.stop(now + duration);
         },
@@ -115,43 +144,3 @@ function toNote(open) {
     'b',
   ][(open + number) % 12] + Math.floor((open + number) / 12);
 }
-
-// function createOscillator(time: number, note: string, duration: number) {
-//   const amplitudeGain = this.context.audioContext.createGain();
-//   amplitudeGain.gain.value = 0;
-//   amplitudeGain.connect(this.connectNode);
-//
-//   const env = contour(this.context.audioContext, {
-//     attack: this.props.envelope.attack,
-//     decay: this.props.envelope.decay,
-//     sustain: this.props.envelope.sustain,
-//     release: this.props.envelope.release,
-//   });
-//
-//   env.connect(amplitudeGain.gain);
-//
-//   const osc = this.context.audioContext.createOscillator();
-//   const transposed = note.slice(0, -1) +
-//     (parseInt(note[note.length - 1], 0) + parseInt(this.props.transpose, 0));
-//
-//   osc.frequency.value = parser.freq(transposed);
-//   osc.type = this.props.type;
-//   osc.connect(amplitudeGain);
-//
-//   if (this.props.busses) {
-//     const master = this.context.getMaster();
-//     this.props.busses.forEach((bus) => {
-//       if (master.busses[bus]) {
-//         osc.connect(master.busses[bus]);
-//       }
-//     });
-//   }
-//
-//   osc.start(time);
-//   env.start(time);
-//
-//   const finish = env.stop(this.context.audioContext.currentTime + duration);
-//   osc.stop(finish);
-// }
-
-export default Player;

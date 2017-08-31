@@ -8,19 +8,23 @@
     "react-scripts": "0.7.0"
   },
   "dependencies": {
-    "audio-contour": "0.0.1",
+    "audio-contour": "^0.0.1",
     "material-ui": "^0.16.4",
     "note-parser": "^2.0.0",
     "react": "^15.4.1",
     "react-codemirror": "^0.3.0",
     "react-dom": "^15.4.1",
     "react-music": "^1.0.2",
-    "react-tap-event-plugin": "^2.0.1"
+    "react-tap-event-plugin": "^2.0.1",
+    "soundfonts": "ryanwhite04/soundfonts"
   },
   "scripts": {
+    "prestart": "node copySoundfonts",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   }
 }
