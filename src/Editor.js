@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-var CodeMirror = require('react-codemirror');
-require('codemirror/lib/codemirror.css');
+import React, { Component } from 'react'
+import CodeMirror from 'react-codemirror'
+import 'codemirror/lib/codemirror.css'
 
 export default class Editor extends Component {
 

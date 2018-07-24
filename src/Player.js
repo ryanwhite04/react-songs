@@ -1,4 +1,15 @@
+import React, { Component } from 'react'
 import contour from 'audio-contour';
+import soundfonts from 'soundfonts';
+import ogg from 'soundfonts/instruments/Acoustic Guitar (nylon)/ogg.json';
+import { Players, Synth } from 'tone';
+
+const player = new Players(ogg);
+
+const guitar = {
+  ...soundfonts.instruments[24],
+  player: player.toMaster(),
+}
 
 const mappings = {
   '_': '|',
@@ -10,62 +21,41 @@ const mappings = {
   'D': '|D5 ',
   'A': '|A4 ',
   'E': '|E4 ',
+}
+
+console.log('Player', player, guitar, mappings)
+
+
+function play(note) {
+  console.log('play', note);
+
+  guitar.player.has(note) && guitar.player.get(note).start();
+  return note;
+}
+
+export default class Player extends Component {
+
+  state = {
+    playing: false,
+  }
+
+  render = () => {
+    const {
+      props: { children },
+      state: { playing }
+    } = this
+
+    
+    return <div>{play(read(children))}</div>
+  }
 };
 
-export default ({
-  children,
-  context,
-  playing,
-  text,
-  ranges,
-}) => {
-
-  // var guitar = new Instrument(context, {
-  //   capo: 6,
-  //   gain: 0.5,
-  //   type: 'sine',
-  //   duration: 1,
-  // }, {
-  //   attack: 0.01,
-  //   decay: 0.2,
-  //   sustain: 0.2,
-  //   release: 0.2
-  // });
-  //
-  // console.log({ ranges })
-  //
-  // ranges
-  //   .map(({ anchor: { line, ch }}) => text.split('\n')[line].slice(0, ch))
-  //   .filter(text => text)
-  //   .map(text => ({
-  //     note: parseInt(text.slice(-1), 36),
-  //     string: guitar.string(getNote(mappings[text.split('|')[0]]))
-  //   }))
-  //   .forEach(({ note, string }, i) => {
-  //     if(!isNaN(note)) {
-  //       console.log({
-  //         note,
-  //       })
-  //       string.pluck(note, 0.5)
-  //     }
-  //   });
-  // return null;
-
-  ranges
-    .map(({ anchor: { line, ch }}) => text.split('\n')[line].slice(0, ch))
-    .filter(text => text)
-    .map(text => ({
-      note: parseInt(text.slice(-1), 36),
-      string: getNote(mappings[text.split('|')[0]])
-    }))
-    .filter(({ note, string }) => !isNaN(note))
-    .map(({ note, string }) => note + string - 20)
-    .map(note => context
-      .createMediaElementSource(children[note])
-      .connect(context.destination)
-    );
-  return null;
-};
+function read(text) {
+  let note = parseInt(text.slice(-1), 36);
+  let string = getNote(mappings[text.split('|')[0]]);
+  console.log('read', { text, note, string })
+  return isNaN(note) ? null : note + string - 38;
+}
 
 function getNote(string = '') {
   var trimmed = string.trim();
@@ -81,6 +71,19 @@ function getNote(string = '') {
     'B'
   ].indexOf(note) + 12 * octave);
 }
+
+function toNote(open) {
+  return number => [
+    'c', 'c#',
+    'd', 'd#',
+    'e',
+    'f', 'f#',
+    'g', 'g#',
+    'a', 'a#',
+    'b',
+  ][(open + number) % 12] + Math.floor((open + number) / 12);
+}
+
 
 function Instrument(context, {
   capo = 0,
@@ -131,16 +134,4 @@ function Instrument(context, {
       }
     },
   };
-}
-
-function toNote(open) {
-  return number => [
-    'c', 'c#',
-    'd', 'd#',
-    'e',
-    'f', 'f#',
-    'g', 'g#',
-    'a', 'a#',
-    'b',
-  ][(open + number) % 12] + Math.floor((open + number) / 12);
 }

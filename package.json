@@ -3,23 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "http://ryanwhite04.github.io/react-songs",
-  "devDependencies": {
-    "gh-pages": "^0.12.0",
-    "react-scripts": "0.7.0"
-  },
   "dependencies": {
     "audio-contour": "^0.0.1",
-    "material-ui": "^0.16.4",
+    "codemirror": "^5.33.0",
+    "gh-pages": "^1.1.0",
+    "material-ui": "^0.20.0",
+    "ncp": "^2.0.0",
     "note-parser": "^2.0.0",
-    "react": "^15.4.1",
-    "react-codemirror": "^0.3.0",
-    "react-dom": "^15.4.1",
+    "react": "^16.2.0",
+    "react-codemirror": "^1.0.0",
+    "react-dom": "^16.2.0",
     "react-music": "^1.0.2",
-    "react-tap-event-plugin": "^2.0.1",
-    "soundfonts": "ryanwhite04/soundfonts"
+    "react-scripts": "^1.0.17",
+    "react-tap-event-plugin": "^3.0.2",
+    "soundfonts": "ryanwhite04/soundfonts",
+    "tone": "^0.11.11"
   },
   "scripts": {
-    "prestart": "node copySoundfonts",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
