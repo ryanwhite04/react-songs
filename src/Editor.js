@@ -1,36 +1,56 @@
 import React, { Component } from 'react'
 import CodeMirror from 'react-codemirror'
 import 'codemirror/lib/codemirror.css'
+import debug from 'debug'
+
+const log = debug('component:Editor')
 
 export default class Editor extends Component {
 
   componentDidMount = () => {
-    console.log('Editor', 'componentDidMount')
+    log('componentDidMount')
     this.instance.codeMirror.on('cursorActivity', this.props.cursorActivity);
+    this.instance.codeMirror.on('keyHandled', this.props.keyHandled)
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    log('shouldComponentUpdate', { nextProps, nextState })
     if (nextProps.ranges !== this.props.ranges) {
       this.setSelections(nextProps.ranges);
     }
     return true;
   }
 
-  cursorsLeft = () => this.instance.codeMirror.execCommand('goCharLeft');
+  cursorsLeft = () => {
+    log('cursorsLeft')
+    this.instance.codeMirror.execCommand('goCharLeft');
+  }
 
-  cursorsRight = () =>this.instance.codeMirror.execCommand('goCharRight');
+  cursorsRight = () => {
+    log('cursorsRight')
+    this.instance.codeMirror.execCommand('goCharRight');
+  }
 
-  getSelections = () => this.instance.codeMirror.listSelections();
+  getSelections = () => {
+    log('getSelections')
+    return this.instance.codeMirror.listSelections();
+  }
 
-  setSelections = ranges => this.instance.codeMirror.setSelections(ranges);
+  setSelections = ranges => {
+    log('setSelections', { ranges })
+    return this.instance.codeMirror.setSelections(ranges);
+  }
 
-  moveCursors = (x, y) => this.setSelections(this.getSelections().map(({
-    anchor: { ch: a, line: b },
-    head: { ch: c, line: d } }
-  ) => ({
-    anchor: { ch: a + x, line: b + y},
-    head: { ch: c + x, line: d + y},
-  })))
+  moveCursors = (x, y) => {
+    log('moveCursors', { x, y })
+    return this.setSelections(this.getSelections().map(({
+      anchor: { ch: a, line: b },
+      head: { ch: c, line: d } }
+    ) => ({
+      anchor: { ch: a + x, line: b + y},
+      head: { ch: c + x, line: d + y},
+    })))
+  }
 
   render = () =>
     <CodeMirror
