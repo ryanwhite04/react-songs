@@ -234,7 +234,7 @@ class App extends Component {
         onRequestChange={open => this.setState({ open })} >
       </Drawer>
       <Editor
-        // implementation='ace editor'
+        ace
         update={update}
         cursorActivity={cursorActivity}
         keyHandled={keyHandled}
@@ -245,6 +245,11 @@ class App extends Component {
           firstLineNumber: 0,
           fixedGutter: false,
         }}
+        // className={classes.editor}
+        // style={{
+        //   width: "100%",
+        //   display:
+        // }}
         >
         {text}
       </Editor>
@@ -259,6 +264,8 @@ class App extends Component {
 export default withStyles({
   root: {
     flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
   },
   flex: {
     flexGrow: 1,
@@ -267,6 +274,11 @@ export default withStyles({
     marginLeft: -12,
     marginRight: 20,
   },
+  editor: {
+    width: "100%",
+    flexGrow: 1,
+    flex: 1,
+  }
 })(App)
 
 // let Player = <Player
