@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
-// import contour from 'audio-contour'
-import soundfonts from 'soundfonts'
 import { Players } from 'tone'
 import debug from 'debug'
+import families from 'soundfonts/families'
+import names from 'soundfonts/names'
+import { homepage } from 'soundfonts/package'
 
+const notes = { first: 21, last: 109 }
+const formats = ['mp3', 'ogg']
 const log = debug('component:Player')
 
 const mappings = {
@@ -18,19 +21,25 @@ const mappings = {
   'E': '|E4 ',
 }
 
-function load(ogg) {
-  return new Promise((resolve, reject) => {
-    new Players(ogg, resolve)
-  })
+function buffer(ogg) {
+  return new Promise((resolve, reject) => new Players(ogg, resolve))
 }
 
-async function getPlayer(instrument = 'Acoustic%20Guitar%20(nylon)', ext = 'mp3') {
-  log('loading instrument: ', instrument)
-  const response = await fetch(`https://ryanwhite04.github.io/soundfonts/${instrument}/${ext}.json`);
-  const ogg = await response.json();
-  const player = await load(ogg)
+async function getInstrument(instrument = 24, ext = 'mp3') {
+
+  const player = await fetch(`${process.env.PUBLIC_URL}/instruments/${names[instrument]}/${ext}.json`)
+    .then(response => response.json())
+    .then(buffer)
+    .catch(err => log('getInstrument', { err }))
+
   log('getPlayer', player)
-  return player;
+  return {
+    name: names[24],
+    notes,
+    formats,
+    family: families[~~(instrument / 16)],
+    player: player.toMaster(),
+  }
 }
 
 export default class Player extends Component {
@@ -39,16 +48,17 @@ export default class Player extends Component {
     ready: false,
   }
   
-  play(player) {
+  play({ player, name, family, formats, notes }) {
     return note => {
       if (Number.isInteger(note) && note >= 0 && note < 88) {
-
-        log('play', { note, player });
-        const guitar = {
-          ...soundfonts.instruments[24],
-          player: player.toMaster(),
-        }
-        guitar.player.has(note) && guitar.player.get(note).start();
+        log('play', { note, instrument: {
+          player,
+          name,
+          family,
+          formats,
+          notes,
+        }});
+        player.has(note) && player.get(note).start();
       }
       return note;
     }
@@ -56,19 +66,19 @@ export default class Player extends Component {
 
   async componentDidMount() {
     log('componentDidMount', this)
-    const player = await getPlayer();
+    const instrument = await getInstrument();
     
-    this.setState({ player, ready: true });
+    this.setState({ instrument, ready: true });
   }
   
   render = () => {
     const {
       props: { children },
-      state: { player, ready },
+      state: { instrument, ready },
       play,
     } = this
     
-    return <div><b><span>{ready ? play(player)(read(children)) : "Loading Instrument"}</span></b><span>{children}</span></div>
+    return <div><b><span>{ready ? play(instrument)(read(children)) : "Loading Instrument"}</span></b><span>{children}</span></div>
   }
 }
 
