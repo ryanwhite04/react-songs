@@ -245,11 +245,6 @@ class App extends Component {
           firstLineNumber: 0,
           fixedGutter: false,
         }}
-        // className={classes.editor}
-        // style={{
-        //   width: "100%",
-        //   display:
-        // }}
         >
         {text}
       </Editor>

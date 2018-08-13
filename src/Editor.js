@@ -51,12 +51,30 @@ export default class Editor extends Component {
 
   cursorsLeft = () => {
     log('cursorsLeft')
-    this.instance.codeMirror.execCommand('goCharLeft');
+    const {
+      props: {
+        ace,
+      },
+      instance: {
+        editor,
+      }
+    } = this;
+    editor.execCommand('gotoleft');
+    // this.instance.codeMirror.execCommand('goCharLeft');
   }
 
   cursorsRight = () => {
     log('cursorsRight')
-    this.instance.codeMirror.execCommand('goCharRight');
+    const {
+      props: {
+        ace,
+      },
+      instance: {
+        editor,
+      }
+    } = this;
+    editor.execCommand('gotoright');
+    // this.instance.codeMirror.execCommand('goCharRight');
   }
 
   getSelections = () => {
@@ -81,17 +99,26 @@ export default class Editor extends Component {
   }
 
   render = () => {
-    const { props } = this;
+    const {
+      props: {
+        keyHandled,
+        ace,
+        update,
+        children,
+        options,
+      }
+    } = this;
     
-    log('render', this, props)
+    log('render', this)
     
-    return props.ace ? <AceEditor
+    return ace ? <AceEditor
       ref={value => this.instance = value}
       mode="java"
       theme="github"
-      onChange={this.props.update}
+      onChange={update}
+      onKeydown={keyHandled}
       name="ReactAceEditor"
-      value={this.props.children}
+      value={children}
       editorProps={{$blockScrolling: true}}
       style={{
         flex: 1,
@@ -100,9 +127,9 @@ export default class Editor extends Component {
     /> : <CodeMirror
       ref={value => this.instance = value}
       className="ReactCodeMirror"
-      value={this.props.children}
-      onChange={this.props.update}
-      options={this.props.options}
+      value={children}
+      onChange={update}
+      options={options}
     />;
   }
 }
