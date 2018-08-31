@@ -5,8 +5,8 @@ import './index.css';
 
 import text from './example.js'
 import AceEditor from 'react-ace'
-import brace from 'brace'
-import 'brace/mode/text'
+// import brace from 'brace'
+// import 'brace/mode/text'
 import 'brace/theme/github'
 import debug from 'debug'
 import { Players } from 'tone'
@@ -53,97 +53,86 @@ class App extends Component {
     }
   }
 
-  // Let's the App know what is happening to the text, not the other way around
   update = text => {
     log('update', { text })
     this.setState({ text });
   }
-
-  skip(key) {
-    return () => {
-      var ranges = this.state.ranges.map(({ anchor: { ch, line }}) => {
-        var next = text.split('\n')[line].slice(ch);
-        var anchor = {
-          ch: ch + 1,
-          line,
-        }
-        // if (next[0] === '|') {
-        //   if (next[1] === '-') {
-        //     anchor.ch += 4;
-        //   } else if (!next[1]) {
-        //     anchor.ch = text.split('\n')[line + 10].indexOf('|---') + 5;
-        //     anchor.line += 10;
-        //   }
-        // }
-        return {
-          anchor, head: {
-            line: anchor.line,
-            ch: anchor.ch - 1,
-          },
-        }
-      });
-      this.setState(({ ranges }) => ({ ranges }))
+  
+  gotolinestart = app => function (editor, { count, ...args }) {
+    debugger
+    let { state: { instrument, text }} = app;
+    const { row, column } = editor.getCursorPosition();
+    const line = text.split('\n')[row]
+    const note = read(line.slice(0, column))
+    const next = line.slice(column - 4, column )
+      // .split('').reverse().join('')
+    log(next)
+    if (/\|---/.test(next)) {
+      editor.navigateLeft(4);
+      log('Skip', `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else if (!column) {
+      editor.navigateUp(10)
+      editor.navigateLineEnd()
+      
+      log('New', `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else {
+      note && instrument && instrument.play(note)
+      editor.navigateLeft(args.times)
+      log('Play', `${next}: ${row}, ${column}`)
     }
   }
   
-  gotolinestart = app => {
-    return function (editor, args) {
-      let { row, column } = editor.getCursorPosition();
-      let text = editor.selection.doc.getLine(row).slice(0, column)
-      let note = read(text);
-      note && log(note)
-      // console.log('gotolinestart', { editor, args, text, note })
-      editor.navigateLeft(args.times);
-    }
-  }
-  
-  gotolineend = app => {
-    return function (editor, { count, ...args }) {
-      let { state: { instrument, text }} = app;
-      const { row, column } = editor.getCursorPosition();
-      const line = text.split('\n')[row]
-      const note = read(line.slice(0, 1+column))
-      const next = line.slice(column, column + 4)
-      if (/\|---/.test(next)) {
-        editor.navigateRight(4);
-        log('Skip', `${next}: ${row}, ${column}`)
-        this.exec(editor, { ...args, count: ++count });
-      } else if (/\|L\d\d/.test(next)) {
-        let col = next.slice(2);
-        editor.navigateTo(parseInt(next.slice(2)), 0)
-        log(`Jump to ${col}`, `${next}: ${row}, ${column}`)
-        this.exec(editor, { ...args, count: ++count });
-      } else if (/^\|\s*$/.test(next)) {
-        editor.navigateDown(10)
-        editor.navigateLineStart()
-        log('Last', `${next}: ${row}, ${column}`)
-        this.exec(editor, { ...args, count: ++count });
-      } else if (/^\|\|\s*$/.test(next)) {
-        // editor.navigateDown(10)
-        editor.navigateLineStart()
-        log('Last', `${next}: ${row}, ${column}`)
-        this.exec(editor, { ...args, count: ++count });
-      } else if (/^\*\|\s*$/.test(next)) {
-        // editor.navigateDown(10)
-        debugger;
-        editor.navigateLineStart()
-        log('Last', `${next}: ${row}, ${column}`)
-        this.exec(editor, { ...args, count: ++count });
-      } else if (!column && /\|?[A-Ga-g]?#?\d?\|/.test(next)) {
-        editor.navigateRight(next.split('|')[0].length)
-        log('New', `${next}: ${row}, ${column}`)
-        this.exec(editor, { ...args, count: ++count });
-      } else {
-        note && instrument && instrument.play(note)
-        editor.navigateRight(args.times)
-        log('Play', `${next}: ${row}, ${column}`)
-      }
+  gotolineend = app => function (editor, { count, ...args }) {
+    let { state: { instrument, text }} = app;
+    const { row, column } = editor.getCursorPosition();
+    const line = text.split('\n')[row]
+    const note = read(line.slice(0, 1+column))
+    const next = line.slice(column, column + 4)
+    if (/\|---/.test(next)) {
+      editor.navigateRight(4);
+      log('Skip', `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else if (/\|L\d\d/.test(next)) {
+      let col = next.slice(2);
+      editor.navigateTo(parseInt(next.slice(2)), 0)
+      log(`Jump to ${col}`, `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else if (/^\|\s*$/.test(next)) {
+      editor.navigateDown(10)
+      editor.navigateLineStart()
+      log('Last', `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else if (/^\|\|\s*$/.test(next)) {
+      // editor.navigateDown(10)
+      editor.navigateLineStart()
+      log('Last', `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else if (/^\*\|\s*$/.test(next)) {
+      // editor.navigateDown(10)
+      debugger;
+      editor.navigateLineStart()
+      log('Last', `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else if (!column && /\|?[A-Ga-g]?#?\d?\|/.test(next)) {
+      editor.navigateRight(next.split('|')[0].length)
+      log('New', `${next}: ${row}, ${column}`)
+      this.exec(editor, { ...args, count: ++count });
+    } else {
+      note && instrument && instrument.play(note)
+      editor.navigateRight(args.times)
+      log('Play', `${next}: ${row}, ${column}`)
     }
   }
   
   download = app => {
     return function(editor, args) {
       log('download')
+      return ({ target }) => {
+        target.setAttribute('href', `data:application/txt,${encodeURIComponent(editor.getValue())}`)
+        target.setAttribute('download', `${document.getElementById('filename').value}.txt`)
+      }
     }
   }
   
